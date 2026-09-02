@@ -6,130 +6,87 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding CYBER // OS database...');
 
-  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@cyberos.dev';
-  const adminRawPassword = process.env.SEED_ADMIN_PASSWORD || 'admin123';
-
   const studentEmail = process.env.SEED_STUDENT_EMAIL || 'student@cyberos.dev';
-  const studentRawPassword = process.env.SEED_STUDENT_PASSWORD || 'password123';
+  const studentPassword = process.env.SEED_STUDENT_PASSWORD || 'password123';
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@cyberos.dev';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin123';
 
-  // Password hashes
-  const studentPassword = await bcrypt.hash(studentRawPassword, 10);
-  const adminPassword = await bcrypt.hash(adminRawPassword, 10);
+  const studentHash = await bcrypt.hash(studentPassword, 10);
+  const adminHash = await bcrypt.hash(adminPassword, 10);
 
-  // Clear existing users
-  await prisma.user.deleteMany({});
-
-  // Create Student
-  const student = await prisma.user.create({
-    data: {
+  const student = await prisma.user.upsert({
+    where: { email: studentEmail },
+    update: {},
+    create: {
       email: studentEmail,
-      name: 'Alex Mercer (Student)',
-      passwordHash: studentPassword,
+      name: 'Alex Rivera',
+      passwordHash: studentHash,
       role: 'STUDENT',
       theme: 'cyan',
     },
   });
 
-  // Create Admin
-  const admin = await prisma.user.create({
-    data: {
+  const admin = await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {},
+    create: {
       email: adminEmail,
-      name: 'Instructor Vance (Admin)',
-      passwordHash: adminPassword,
+      name: 'Instructor Admin',
+      passwordHash: adminHash,
       role: 'ADMIN',
-      theme: 'emerald',
+      theme: 'cyan',
     },
   });
 
-  console.log('Created Users:', { student: student.email, admin: admin.email });
+  console.log('Created Users:', {
+    student: student.email,
+    admin: admin.email,
+  });
 
-  // Create Sample Notes for Student
-  const note1 = await prisma.note.create({
-    data: {
+  // Create Initial Notes
+  const note1 = await prisma.note.upsert({
+    where: { id: 'note-sqli-01' },
+    update: {},
+    create: {
+      id: 'note-sqli-01',
       userId: student.id,
-      title: 'SQL Injection Exploitation & Prevention',
+      title: 'SQL Injection: Advanced Bypass & Union Exploitation',
       category: 'Web Security',
-      tags: JSON.stringify(['OWASP', 'SQLi', 'Web', 'Pentesting']),
-      masteryPercent: 85,
-      timeStudiedMinutes: 120,
+      tags: JSON.stringify(['OWASP', 'SQLi', 'Pentesting']),
+      description: 'Comprehensive analysis of UNION-based SQL injection techniques, column count identification, and data extraction.',
       icon: '🛡️',
-      description: 'In-depth breakdown of Error-based, Blind, and Union SQLi payloads.',
+      coverImage: 'linear-gradient(to right, #06201b, #0f4c3a, #06201b)',
+      masteryPercent: 85,
+      timeStudiedMinutes: 145,
       content: JSON.stringify([
-        {
-          id: 'b1',
-          type: 'heading1',
-          content: 'SQL Injection Deep Dive',
-        },
-        {
-          id: 'b2',
-          type: 'paragraph',
-          content: 'SQL Injection occurs when untrusted user input is concatenated directly into dynamic SQL database queries without parameterization.',
-        },
-        {
-          id: 'b3',
-          type: 'concept',
-          content: 'Key Concept: Parameterized Queries (Prepared Statements) ensure database engines treat user input strictly as data parameters, preventing code injection execution.',
-        },
-        {
-          id: 'b4',
-          type: 'cmd',
-          content: 'sqlmap -u "http://target.lab/product.php?id=1" --dbs --batch',
-        },
-        {
-          id: 'b5',
-          type: 'vuln',
-          cveId: 'CVE-2023-34362',
-          severity: 'Critical',
-          vulnerabilityDescription: 'MOVEit Transfer SQL Injection flaw allowing unauthenticated remote code execution.',
-        },
-        {
-          id: 'b6',
-          type: 'code',
-          language: 'sql',
-          content: '-- Union Based Payload\nSELECT username, password FROM users WHERE id = 1 UNION SELECT 1, @@version--',
-        },
+        { id: 'b-1', type: 'heading1', content: '1. Executive Summary' },
+        { id: 'b-2', type: 'paragraph', content: 'SQL injection remains a critical OWASP Top 10 vulnerability allowing attackers to manipulate backend SQL queries via untrusted user input.' },
+        { id: 'b-3', type: 'heading2', content: '2. Union-Based Payload Syntax' },
+        { id: 'b-4', type: 'cmd', content: "' UNION SELECT NULL, NULL, @@version, NULL-- -" },
+        { id: 'b-5', type: 'vuln', content: 'Unsanitized parameter handling in authentication search filter', cveId: 'CVE-2024-8891', severity: 'Critical' },
+        { id: 'b-6', type: 'concept', content: 'UNION operator requires identical column counts and compatible data types across query results.' }
       ]),
     },
   });
 
-  const note2 = await prisma.note.create({
-    data: {
+  const note2 = await prisma.note.upsert({
+    where: { id: 'note-ad-01' },
+    update: {},
+    create: {
+      id: 'note-ad-01',
       userId: student.id,
-      title: 'Linux Privilege Escalation Techniques',
-      category: 'Linux',
-      tags: JSON.stringify(['Linux', 'PrivEsc', 'SUID', 'Capabilities']),
+      title: 'Active Directory: Kerberoasting Attack Methodology',
+      category: 'Active Directory',
+      tags: JSON.stringify(['Kerberos', 'AD', 'PrivEsc']),
+      description: 'Requesting TGS tickets for SPNs and offline cracking with Hashcat.',
+      icon: '🔑',
+      coverImage: 'linear-gradient(to right, #1d0f36, #3b1b6e, #1d0f36)',
       masteryPercent: 70,
       timeStudiedMinutes: 90,
-      icon: '🐧',
-      description: 'Enumeration commands for SUID bits, sudo rights, and misconfigured cron jobs.',
       content: JSON.stringify([
-        {
-          id: 'b10',
-          type: 'heading1',
-          content: 'Linux SUID Enumeration',
-        },
-        {
-          id: 'b11',
-          type: 'cmd',
-          content: 'find / -perm -4000 -type f -ls 2>/dev/null',
-        },
-        {
-          id: 'b12',
-          type: 'bullet',
-          content: 'GTFOBins search for binaries with SUID enabled (e.g. nmap, vim, find, env).',
-        },
-        {
-          id: 'b13',
-          type: 'checklist',
-          content: 'Check sudo privileges with sudo -l',
-          checked: true,
-        },
-        {
-          id: 'b14',
-          type: 'checklist',
-          content: 'Check system cron jobs in /etc/crontab',
-          checked: false,
-        },
+        { id: 'b-1', type: 'heading1', content: 'Kerberoasting Workflow' },
+        { id: 'b-2', type: 'paragraph', content: 'Target service accounts with SPNs configured to request encrypted TGS tickets.' },
+        { id: 'b-3', type: 'cmd', content: 'GetUserSPNs.py -request -dc-ip 10.10.10.10 domain.local/user' }
       ]),
     },
   });
@@ -138,51 +95,29 @@ async function main() {
   await prisma.studySession.create({
     data: {
       userId: student.id,
-      linkedNoteId: note1.id,
+      startedAt: new Date(Date.now() - 3600000 * 24 * 2),
+      endedAt: new Date(Date.now() - 3600000 * 24 * 2 + 3600000 * 1.5),
+      durationMinutes: 90,
       category: 'Web Security',
-      startedAt: new Date(Date.now() - 3600000 * 2),
-      endedAt: new Date(Date.now() - 3600000 * 1),
-      durationMinutes: 60,
-      contentStudied: 'Mastered Union-based SQLi payloads and practiced sqlmap automation.',
-      difficulties: 'Struggled with understanding blind time-based boolean extraction delays.',
-      nextSteps: 'Practice manual time-based payload construction on PortSwigger Web Security Academy.',
+      linkedNoteId: note1.id,
+      contentStudied: 'Reviewed SQLi Union queries and error-based injection.',
+      difficulties: 'Understanding second-order SQL injection timing.',
+      nextSteps: 'Practice PortSwigger Blind SQLi lab.',
     },
   });
 
-  await prisma.studySession.create({
-    data: {
-      userId: student.id,
-      linkedNoteId: note2.id,
-      category: 'Linux',
-      startedAt: new Date(Date.now() - 86400000 * 1),
-      endedAt: new Date(Date.now() - 86400000 * 1 + 2700000),
-      durationMinutes: 45,
-      contentStudied: 'SUID bit enumeration & GTFOBins exploitation paths.',
-      difficulties: 'Confused by Linux capability syntax (cap_setuid+ep vs SUID bit).',
-      nextSteps: 'Set up custom lab VM with custom SUID binaries.',
-    },
-  });
-
-  // Create Lab Completions
+  // Create Lab Completion
   await prisma.labCompletion.create({
     data: {
       userId: student.id,
       labName: 'PortSwigger: SQL injection UNION attack',
-      notes: 'Completed in 25 mins. Used UNION SELECT null, null to identify column count.',
+      category: 'Web Security',
+      timeTakenMin: 25,
+      keyLearnings: 'Used UNION SELECT null, null to identify column count.',
     },
   });
 
-  // Create Concepts
-  await prisma.concept.create({
-    data: {
-      userId: student.id,
-      title: 'Same-Origin Policy (SOP)',
-      description: 'Core web browser security mechanism restricting how a document or script loaded from one origin can interact with a resource from another origin.',
-      relatedNoteId: note1.id,
-    },
-  });
-
-  console.log('Database successfully seeded with environment-driven credentials!');
+  console.log('Database seeded successfully!');
 }
 
 main()
