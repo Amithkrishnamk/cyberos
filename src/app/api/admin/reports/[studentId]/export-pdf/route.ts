@@ -22,7 +22,7 @@ export async function GET(req: Request, { params }: { params: { studentId: strin
 
     const sessions = await prisma.studySession.findMany({
       where: { userId: student.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: { startedAt: "desc" },
     });
 
     const notesCount = await prisma.note.count({

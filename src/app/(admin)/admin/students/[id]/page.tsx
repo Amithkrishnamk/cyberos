@@ -15,6 +15,8 @@ import {
   MessageSquare,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminStudentDetailPage({ params }: { params: { id: string } }) {
   const session = await getAuthSession();
 
@@ -28,8 +30,7 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
       notes: { orderBy: { updatedAt: "desc" } },
       labCompletions: { orderBy: { completedAt: "desc" } },
       studySessions: {
-        include: { linkedNote: { select: { title: true } } },
-        orderBy: { createdAt: "desc" },
+        orderBy: { startedAt: "desc" },
       },
     },
   });
@@ -41,6 +42,9 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
     0
   );
   const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
+
+  // Map notes lookup for linked note title
+  const notesMap = new Map(student.notes.map((n) => [n.id, n.title]));
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 font-mono">
@@ -125,53 +129,56 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
           <div className="text-xs text-slate-500 py-6 text-center">No study sessions logged by student yet.</div>
         ) : (
           <div className="space-y-4">
-            {student.studySessions.map((sessionItem) => (
-              <div
-                key={sessionItem.id}
-                className="bg-[#090d16] border border-slate-800 rounded-xl p-4 space-y-3"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 text-[10px] font-bold">
-                      {sessionItem.category || "General"}
-                    </span>
-                    {sessionItem.linkedNote?.title && (
-                      <span className="text-xs text-slate-300 font-bold">
-                        Linked: {sessionItem.linkedNote.title}
+            {student.studySessions.map((sessionItem) => {
+              const linkedTitle = sessionItem.linkedNoteId ? notesMap.get(sessionItem.linkedNoteId) : null;
+              return (
+                <div
+                  key={sessionItem.id}
+                  className="bg-[#090d16] border border-slate-800 rounded-xl p-4 space-y-3"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 text-[10px] font-bold">
+                        {sessionItem.category || "General"}
                       </span>
-                    )}
-                  </div>
-                  <div className="text-[10px] text-emerald-400 flex items-center gap-3">
-                    <span>Duration: {sessionItem.durationMinutes} mins</span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-slate-400">
-                      {new Date(sessionItem.startedAt).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[10px] text-cyan-400 font-bold uppercase mb-0.5">Content Studied</div>
-                  <p className="text-xs text-slate-200">{sessionItem.contentStudied || "N/A"}</p>
-                </div>
-
-                {sessionItem.difficulties && (
-                  <div className="bg-amber-950/20 border border-amber-900/40 rounded-lg p-2.5">
-                    <div className="text-[10px] text-amber-400 font-bold uppercase mb-0.5 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3 text-amber-400" /> Flagged Difficulty / Struggle
+                      {linkedTitle && (
+                        <span className="text-xs text-slate-300 font-bold">
+                          Linked: {linkedTitle}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-xs text-amber-200">{sessionItem.difficulties}</p>
+                    <div className="text-[10px] text-emerald-400 flex items-center gap-3">
+                      <span>Duration: {sessionItem.durationMinutes} mins</span>
+                      <span className="text-slate-500">•</span>
+                      <span className="text-slate-400">
+                        {new Date(sessionItem.startedAt).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
-                )}
 
-                {sessionItem.nextSteps && (
                   <div>
-                    <div className="text-[10px] text-emerald-400 font-bold uppercase mb-0.5">Next Steps</div>
-                    <p className="text-xs text-slate-300">{sessionItem.nextSteps}</p>
+                    <div className="text-[10px] text-cyan-400 font-bold uppercase mb-0.5">Content Studied</div>
+                    <p className="text-xs text-slate-200">{sessionItem.contentStudied || "N/A"}</p>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {sessionItem.difficulties && (
+                    <div className="bg-amber-950/20 border border-amber-900/40 rounded-lg p-2.5">
+                      <div className="text-[10px] text-amber-400 font-bold uppercase mb-0.5 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-amber-400" /> Flagged Difficulty / Struggle
+                      </div>
+                      <p className="text-xs text-amber-200">{sessionItem.difficulties}</p>
+                    </div>
+                  )}
+
+                  {sessionItem.nextSteps && (
+                    <div>
+                      <div className="text-[10px] text-emerald-400 font-bold uppercase mb-0.5">Next Steps</div>
+                      <p className="text-xs text-slate-300">{sessionItem.nextSteps}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -224,7 +231,9 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
                       {new Date(lab.completedAt).toLocaleDateString()}
                     </span>
                   </div>
-                  {lab.notes && <p className="text-[11px] text-slate-300 mt-1">{lab.notes}</p>}
+                  {(lab.keyLearnings || (lab as any).notes) && (
+                    <p className="text-[11px] text-slate-300 mt-1">{lab.keyLearnings || (lab as any).notes}</p>
+                  )}
                 </div>
               ))}
             </div>

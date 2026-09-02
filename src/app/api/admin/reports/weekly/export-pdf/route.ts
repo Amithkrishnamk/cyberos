@@ -27,10 +27,10 @@ export async function GET(req: Request) {
     const sessions = await prisma.studySession.findMany({
       where: {
         userId: { in: userIds },
-        createdAt: { gte: startDate },
+        startedAt: { gte: startDate },
       },
       include: { user: { select: { name: true } } },
-      orderBy: { createdAt: "desc" },
+      orderBy: { startedAt: "desc" },
     });
 
     const notesCount = await prisma.note.count({

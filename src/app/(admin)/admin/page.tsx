@@ -39,7 +39,7 @@ export default async function AdminDashboardPage() {
   const totalLabs = await prisma.labCompletion.count();
 
   const allSessions = await prisma.studySession.findMany({
-    select: { durationMinutes: true, difficulties: true, category: true, createdAt: true },
+    select: { durationMinutes: true, difficulties: true, category: true, startedAt: true },
   });
 
   const totalMinutes = allSessions.reduce((acc, s) => acc + (s.durationMinutes || 0), 0);

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   try {
     const session = await getAuthSession();
@@ -42,15 +44,23 @@ export async function GET(req: Request) {
       });
     }
 
-    const sessions = await prisma.studySession.findMany({
+    const rawSessions = await prisma.studySession.findMany({
       where: { userId: userIdToQuery },
-      include: {
-        linkedNote: {
-          select: { id: true, title: true, category: true },
-        },
-      },
-      orderBy: { createdAt: "desc" },
+      orderBy: { startedAt: "desc" },
     });
+
+    // Attach note title lookup if linkedNoteId exists
+    const userNotes = await prisma.note.findMany({
+      where: { userId: userIdToQuery },
+      select: { id: true, title: true, category: true },
+    });
+
+    const notesMap = new Map(userNotes.map((n) => [n.id, n]));
+
+    const sessions = rawSessions.map((s) => ({
+      ...s,
+      linkedNote: s.linkedNoteId ? notesMap.get(s.linkedNoteId) || null : null,
+    }));
 
     // Also check if there is an active session in progress right now
     const activeSession = await prisma.studySession.findFirst({
@@ -58,7 +68,7 @@ export async function GET(req: Request) {
         userId: userIdToQuery,
         endedAt: null,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { startedAt: "desc" },
     });
 
     return NextResponse.json({ sessions, activeSession });

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -46,7 +48,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // Return sanitized user object
     return NextResponse.json(
       {
         user: {
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { error: "Internal server error during registration" },
+      { error: error?.message || "Internal server error during registration" },
       { status: 500 }
     );
   }

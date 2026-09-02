@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   try {
     const session = await getAuthSession();
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { labName, notes } = body;
+    const { labName, category, timeTakenMin, keyLearnings, notes } = body;
 
     if (!labName) {
       return NextResponse.json({ error: "Lab name is required" }, { status: 400 });
@@ -47,7 +49,9 @@ export async function POST(req: Request) {
       data: {
         userId: (session.user as any).id,
         labName: labName.trim(),
-        notes: notes || "",
+        category: category || "Web Security",
+        timeTakenMin: Number(timeTakenMin) || 0,
+        keyLearnings: keyLearnings || notes || "",
       },
     });
 
