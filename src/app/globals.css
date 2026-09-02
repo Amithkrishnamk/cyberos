@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root, [data-theme="cyan"] {
+  /* Default: Cyan Theme */
+  --cyber-bg: #090d16;
+  --cyber-surface: #111827;
+  --cyber-surface-hover: #162238;
+  --cyber-border: #1f293d;
+  --cyber-accent: #06b6d4;
+  --cyber-accent-hover: #0891b2;
+  --cyber-accent-glow: rgba(6, 182, 212, 0.25);
+  --cyber-muted: #64748b;
+  --cyber-text: #e2e8f0;
+  --cyber-heading: #f8fafc;
+}
+
+/* Emerald Theme */
+[data-theme="emerald"] {
+  --cyber-bg: #06140e;
+  --cyber-surface: #0b2218;
+  --cyber-surface-hover: #123325;
+  --cyber-border: #143829;
+  --cyber-accent: #10b981;
+  --cyber-accent-hover: #059669;
+  --cyber-accent-glow: rgba(16, 185, 129, 0.25);
+  --cyber-muted: #5eead4;
+  --cyber-text: #e6f4f1;
+  --cyber-heading: #ffffff;
+}
+
+/* Violet Theme */
+[data-theme="violet"] {
+  --cyber-bg: #0f0a1c;
+  --cyber-surface: #19102e;
+  --cyber-surface-hover: #241842;
+  --cyber-border: #2c1d50;
+  --cyber-accent: #8b5cf6;
+  --cyber-accent-hover: #7c3aed;
+  --cyber-accent-glow: rgba(139, 92, 246, 0.25);
+  --cyber-muted: #c084fc;
+  --cyber-text: #f3e8ff;
+  --cyber-heading: #ffffff;
+}
+
+/* Amber Theme */
+[data-theme="amber"] {
+  --cyber-bg: #140d05;
+  --cyber-surface: #241708;
+  --cyber-surface-hover: #33210c;
+  --cyber-border: #3d280e;
+  --cyber-accent: #f59e0b;
+  --cyber-accent-hover: #d97706;
+  --cyber-accent-glow: rgba(245, 158, 11, 0.25);
+  --cyber-muted: #fbbf24;
+  --cyber-text: #fef3c7;
+  --cyber-heading: #ffffff;
+}
+
+/* Red Team Theme */
+[data-theme="red"] {
+  --cyber-bg: #140507;
+  --cyber-surface: #240a0e;
+  --cyber-surface-hover: #360f15;
+  --cyber-border: #3d1218;
+  --cyber-accent: #ef4444;
+  --cyber-accent-hover: #dc2626;
+  --cyber-accent-glow: rgba(239, 68, 68, 0.25);
+  --cyber-muted: #fca5a5;
+  --cyber-text: #fee2e2;
+  --cyber-heading: #ffffff;
+}
+
+/* Stealth Blue Theme */
+[data-theme="stealth"] {
+  --cyber-bg: #050a14;
+  --cyber-surface: #0a1326;
+  --cyber-surface-hover: #0f1c38;
+  --cyber-border: #142447;
+  --cyber-accent: #3b82f6;
+  --cyber-accent-hover: #2563eb;
+  --cyber-accent-glow: rgba(59, 130, 246, 0.25);
+  --cyber-muted: #93c5fd;
+  --cyber-text: #eff6ff;
+  --cyber-heading: #ffffff;
+}
+
+body {
+  background-color: var(--cyber-bg) !important;
+  color: var(--cyber-text) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Theme helper classes */
+.bg-cyber-bg {
+  background-color: var(--cyber-bg) !important;
+}
+
+.bg-cyber-surface {
+  background-color: var(--cyber-surface) !important;
+}
+
+.border-cyber-border {
+  border-color: var(--cyber-border) !important;
+}
+
+.text-cyber-accent {
+  color: var(--cyber-accent) !important;
+}
+
+.bg-cyber-accent {
+  background-color: var(--cyber-accent) !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cyber-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cyber-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cyber-accent);
+}

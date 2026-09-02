@@ -1,0 +1,83 @@
+// Prisma Schema for CYBER // OS
+// Designed to be 100% identical and portable between SQLite (local dev) and PostgreSQL (production).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("STUDENT") // "STUDENT" | "ADMIN"
+  theme        String   @default("cyan")    // "cyan" | "emerald" | "violet" | "amber" | "red" | "stealth"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  notes          Note[]
+  studySessions  StudySession[]
+  labCompletions LabCompletion[]
+  concepts       Concept[]
+}
+
+model Note {
+  id                 String   @id @default(uuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title              String   @default("Untitled Note")
+  category           String   @default("Web Security") // Web Security, Linux, Active Directory, SOC, Networking, Pentesting
+  tags               String   @default("[]") // JSON stringified array of strings
+  content            String   @default("[]") // JSON stringified array of block objects
+  masteryPercent     Int      @default(0)
+  timeStudiedMinutes Int      @default(0)
+  icon               String   @default("📝")
+  coverImage         String   @default("linear-gradient(to r, #0f172a, #1e293b, #0f172a)")
+  description        String   @default("")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  studySessions StudySession[]
+}
+
+model StudySession {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkedNoteId    String?
+  linkedNote      Note?     @relation(fields: [linkedNoteId], references: [id], onDelete: SetNull)
+  category        String?
+  startedAt       DateTime  @default(now())
+  endedAt         DateTime?
+  lastHeartbeatAt DateTime?
+  durationMinutes Int       @default(0)
+  contentStudied  String?
+  difficulties    String?
+  nextSteps       String?
+  createdAt       DateTime  @default(now())
+}
+
+model LabCompletion {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  labName     String
+  completedAt DateTime @default(now())
+  notes       String?
+}
+
+model Concept {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  description   String
+  relatedNoteId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
