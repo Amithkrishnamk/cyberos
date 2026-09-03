@@ -15,19 +15,30 @@ export async function GET(req: Request) {
     const category = searchParams.get("category");
     const targetUserId = searchParams.get("userId");
 
-    // Enforce security rule: non-admins can only query their own notes
-    let userIdToQuery = (session.user as any).id;
-    if (targetUserId && (session.user as any).role === "ADMIN") {
-      userIdToQuery = targetUserId;
+    const currentUserId = (session.user as any).id;
+    const currentUserRole = (session.user as any).role;
+
+    let whereClause: any = {};
+
+    if (targetUserId && currentUserRole === "ADMIN") {
+      whereClause.userId = targetUserId;
+    } else {
+      // Students see all notes created by Admins plus their own notes
+      whereClause.OR = [
+        { userId: currentUserId },
+        { user: { role: "ADMIN" } },
+      ];
     }
 
-    const whereClause: any = { userId: userIdToQuery };
     if (category && category !== "All Pages") {
       whereClause.category = category;
     }
 
     const notes = await prisma.note.findMany({
       where: whereClause,
+      include: {
+        user: { select: { id: true, name: true, role: true } },
+      },
       orderBy: { updatedAt: "desc" },
     });
 
@@ -51,7 +62,7 @@ export async function POST(req: Request) {
     const note = await prisma.note.create({
       data: {
         userId: (session.user as any).id,
-        title: title || "Untitled Note",
+        title: title || "Untitled Cybersecurity Note",
         category: category || "Web Security",
         tags: typeof tags === "string" ? tags : JSON.stringify(tags || []),
         content: typeof content === "string" ? content : JSON.stringify(content || []),

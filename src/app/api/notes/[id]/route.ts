@@ -11,16 +11,21 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     const note = await prisma.note.findUnique({
       where: { id: params.id },
+      include: {
+        user: { select: { id: true, name: true, role: true } },
+      },
     });
 
     if (!note) {
       return NextResponse.json({ error: "Note not found" }, { status: 404 });
     }
 
-    // Access control: verify session.user.id === note.userId unless requester is ADMIN
     const currentUserId = (session.user as any).id;
     const currentUserRole = (session.user as any).role;
-    if (note.userId !== currentUserId && currentUserRole !== "ADMIN") {
+    const isAuthorAdmin = note.user?.role === "ADMIN";
+
+    // Students can access notes they created or notes published by Admin
+    if (note.userId !== currentUserId && currentUserRole !== "ADMIN" && !isAuthorAdmin) {
       return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
     }
 
@@ -48,6 +53,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     const currentUserId = (session.user as any).id;
     const currentUserRole = (session.user as any).role;
+
+    // Only creator or Admin can edit note
     if (note.userId !== currentUserId && currentUserRole !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
     }

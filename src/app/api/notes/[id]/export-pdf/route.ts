@@ -12,6 +12,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     const note = await prisma.note.findUnique({
       where: { id: params.id },
+      include: {
+        user: { select: { id: true, name: true, role: true } },
+      },
     });
 
     if (!note) {
@@ -20,7 +23,10 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     const currentUserId = (session.user as any).id;
     const currentUserRole = (session.user as any).role;
-    if (note.userId !== currentUserId && currentUserRole !== "ADMIN") {
+    const isAuthorAdmin = note.user?.role === "ADMIN";
+
+    // Students can export PDF for notes they created or notes published by Admin
+    if (note.userId !== currentUserId && currentUserRole !== "ADMIN" && !isAuthorAdmin) {
       return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
     }
 
