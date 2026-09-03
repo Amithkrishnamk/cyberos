@@ -157,7 +157,10 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   const logManualSession = async (options: ManualSessionOptions) => {
     setCategory(options.category || "Web Security");
     setLinkedNoteId(options.linkedNoteId || null);
-    setElapsedSeconds(options.durationMinutes * 60);
+    
+    // Convert durationMinutes to seconds
+    const minutesToLog = Math.max(1, options.durationMinutes);
+    setElapsedSeconds(minutesToLog * 60);
 
     try {
       const res = await fetch("/api/sessions", {
@@ -200,12 +203,16 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   }) => {
     if (!activeSessionId) return;
 
+    // Calculate accurate active study duration minutes from elapsedSeconds
+    const activeDurationMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
+
     try {
       await fetch(`/api/sessions/${activeSessionId}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           endedAt: new Date().toISOString(),
+          durationMinutes: activeDurationMinutes,
           contentStudied: feedback.contentStudied,
           difficulties: feedback.difficulties,
           nextSteps: feedback.nextSteps,
@@ -220,12 +227,15 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   const skipFeedback = async () => {
     if (!activeSessionId) return;
 
+    const activeDurationMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
+
     try {
       await fetch(`/api/sessions/${activeSessionId}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           endedAt: new Date().toISOString(),
+          durationMinutes: activeDurationMinutes,
           contentStudied: "Quick study session completed.",
         }),
       });
@@ -242,12 +252,14 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
 
   const terminateAndSignOut = async () => {
     if (activeSessionId) {
+      const activeDurationMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
       try {
         await fetch(`/api/sessions/${activeSessionId}/complete`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             endedAt: new Date().toISOString(),
+            durationMinutes: activeDurationMinutes,
             contentStudied: "Study session auto-saved on user logout.",
           }),
         });

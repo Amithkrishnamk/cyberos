@@ -22,18 +22,31 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     const body = await req.json();
-    const { contentStudied, difficulties, nextSteps, endedAt: clientEndedAt } = body;
+    const {
+      contentStudied,
+      difficulties,
+      nextSteps,
+      endedAt: clientEndedAt,
+      durationMinutes: clientDurationMinutes,
+    } = body;
 
     const endedAt = clientEndedAt ? new Date(clientEndedAt) : new Date();
-    const startedAt = new Date(studySession.startedAt);
 
-    // Calculate duration in minutes server-side from timestamps
-    const diffMs = endedAt.getTime() - startedAt.getTime();
-    const durationMinutes = Math.max(1, Math.round(diffMs / (60 * 1000)));
+    // Use client-provided active elapsed duration minutes (manual or stopwatch)
+    let durationMinutes = Number(clientDurationMinutes);
+    if (!durationMinutes || isNaN(durationMinutes) || durationMinutes <= 0) {
+      const startedAt = new Date(studySession.startedAt);
+      const diffMs = endedAt.getTime() - startedAt.getTime();
+      durationMinutes = Math.max(1, Math.round(diffMs / (60 * 1000)));
+    }
+
+    // Set consistent startedAt based on true duration
+    const calculatedStartedAt = new Date(endedAt.getTime() - durationMinutes * 60 * 1000);
 
     const updatedSession = await prisma.studySession.update({
       where: { id: params.id },
       data: {
+        startedAt: calculatedStartedAt,
         endedAt,
         durationMinutes,
         contentStudied: contentStudied || "Study session completed.",
