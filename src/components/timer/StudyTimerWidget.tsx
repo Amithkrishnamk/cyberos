@@ -7,9 +7,7 @@ import { NoteCategory } from "@/types";
 
 export default function StudyTimerWidget() {
   const {
-    mode,
     status,
-    targetMinutes,
     elapsedSeconds,
     category,
     startTimer,
@@ -21,8 +19,6 @@ export default function StudyTimerWidget() {
   const [notes, setNotes] = useState<Array<{ id: string; title: string; category: string; icon?: string }>>([]);
   const [selectedNoteId, setSelectedNoteId] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<NoteCategory>("Web Security");
-  const [timerMode, setTimerMode] = useState<"countdown" | "stopwatch">("stopwatch");
-  const [targetMin, setTargetMin] = useState<number>(25);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -42,12 +38,10 @@ export default function StudyTimerWidget() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const remainingSeconds = Math.max(0, targetMinutes * 60 - elapsedSeconds);
-
   const handleStart = () => {
     startTimer({
-      mode: timerMode,
-      targetMinutes: targetMin,
+      mode: "stopwatch",
+      targetMinutes: 0,
       linkedNoteId: selectedNoteId || undefined,
       category: selectedCategory,
     });
@@ -61,9 +55,7 @@ export default function StudyTimerWidget() {
         <div className="flex items-center gap-3 bg-[#111827] border border-cyan-500/40 rounded-lg px-3 py-1.5 shadow-lg shadow-cyan-500/10 text-xs font-mono">
           <div className="flex items-center gap-1.5 text-cyan-400 font-bold animate-pulse">
             <Flame className="w-4 h-4 text-cyan-400" />
-            <span>
-              {mode === "countdown" ? formatTime(remainingSeconds) : formatTime(elapsedSeconds)}
-            </span>
+            <span>{formatTime(elapsedSeconds)}</span>
           </div>
 
           <div className="hidden md:flex items-center gap-1.5 text-slate-400 border-l border-slate-800 pl-3">
@@ -118,54 +110,13 @@ export default function StudyTimerWidget() {
                 </span>
               </div>
 
-              {/* Mode Toggle */}
-              <div>
-                <label className="block text-[10px] text-slate-400 uppercase mb-1">Session Mode</label>
-                <div className="flex bg-[#090d16] p-1 rounded-lg border border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => setTimerMode("stopwatch")}
-                    className={`flex-1 py-1 rounded text-[11px] transition ${
-                      timerMode === "stopwatch" ? "bg-cyan-600 text-white font-bold" : "text-slate-400"
-                    }`}
-                  >
-                    Open Stopwatch
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTimerMode("countdown")}
-                    className={`flex-1 py-1 rounded text-[11px] transition ${
-                      timerMode === "countdown" ? "bg-cyan-600 text-white font-bold" : "text-slate-400"
-                    }`}
-                  >
-                    Countdown
-                  </button>
-                </div>
-              </div>
-
-              {timerMode === "countdown" && (
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">
-                    Duration (Minutes)
-                  </label>
-                  <input
-                    type="number"
-                    min={5}
-                    max={180}
-                    value={targetMin}
-                    onChange={(e) => setTargetMin(Number(e.target.value))}
-                    className="w-full bg-[#090d16] border border-slate-800 rounded px-2 py-1 text-white text-xs focus:border-cyan-500 focus:outline-none"
-                  />
-                </div>
-              )}
-
               {/* Category Dropdown */}
               <div>
                 <label className="block text-[10px] text-slate-400 uppercase mb-1">Target Category</label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value as NoteCategory)}
-                  className="w-full bg-[#090d16] border border-slate-800 rounded px-2 py-1 text-white text-xs focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-[#090d16] border border-slate-800 rounded px-2.5 py-1.5 text-white text-xs focus:border-cyan-500 focus:outline-none"
                 >
                   <option value="Web Security">Web Security</option>
                   <option value="Linux">Linux</option>
@@ -185,7 +136,7 @@ export default function StudyTimerWidget() {
                 <select
                   value={selectedNoteId}
                   onChange={(e) => setSelectedNoteId(e.target.value)}
-                  className="w-full bg-[#090d16] border border-slate-800 rounded px-2 py-1 text-white text-xs focus:border-cyan-500 focus:outline-none truncate"
+                  className="w-full bg-[#090d16] border border-slate-800 rounded px-2.5 py-1.5 text-white text-xs focus:border-cyan-500 focus:outline-none truncate"
                 >
                   <option value="">-- None --</option>
                   {notes.map((n) => (
@@ -199,7 +150,7 @@ export default function StudyTimerWidget() {
               <button
                 type="button"
                 onClick={handleStart}
-                className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-600/20"
+                className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-600/20"
               >
                 <Play className="w-3.5 h-3.5 fill-current" /> START TIMER
               </button>
