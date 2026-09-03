@@ -18,10 +18,23 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
 
     if (studySession.userId !== (session.user as any).id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
     }
 
     const now = new Date();
+
+    // Throttling: reject heartbeat if last ping was less than 15 seconds ago to prevent DB spam
+    if (studySession.lastHeartbeatAt) {
+      const secondsSinceLastPing = (now.getTime() - new Date(studySession.lastHeartbeatAt).getTime()) / 1000;
+      if (secondsSinceLastPing < 15) {
+        return NextResponse.json({
+          success: true,
+          throttled: true,
+          lastHeartbeatAt: studySession.lastHeartbeatAt,
+        });
+      }
+    }
+
     const updated = await prisma.studySession.update({
       where: { id: params.id },
       data: {
