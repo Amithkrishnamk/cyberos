@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import StudentRosterTable from "@/components/admin/StudentRosterTable";
+import TodayClassCard from "@/components/dashboard/TodayClassCard";
 import {
   ShieldAlert,
   Users,
@@ -107,6 +108,9 @@ export default async function AdminDashboardPage() {
           </a>
         </div>
       </div>
+
+      {/* TODAY'S CLASS CONTENT & SYLLABUS (WITH ADMIN EDIT OPTION) */}
+      <TodayClassCard />
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

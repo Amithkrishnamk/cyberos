@@ -76,3 +76,13 @@ model Concept {
   mastery     Int      @default(0)
   lastRevise  DateTime @default(now())
 }
+
+model ClassContent {
+  id          String   @id @default("today-class")
+  title       String   @default("Web Security: Advanced SQL Injection & Union Exploitation")
+  category    String   @default("Web Security")
+  description String   @default("Today's focus: Identifying column counts using UNION NULL injection, extracting database metadata, and practicing PortSwigger SQLi labs.")
+  labUrl      String   @default("https://portswigger.net/web-security/sql-injection")
+  keyNotice   String   @default("Please log your study session timer and submit your mandatory end-of-session reflection log after completing today's lab.")
+  updatedAt   DateTime @default(now()) @updatedAt
+}

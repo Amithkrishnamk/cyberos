@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import TodayClassCard from "@/components/dashboard/TodayClassCard";
 import {
   BookOpen,
   Clock,
@@ -111,6 +112,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* TODAY'S CLASS CONTENT & SYLLABUS ANNOUNCEMENT */}
+      <TodayClassCard />
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
