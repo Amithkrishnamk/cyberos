@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTimer } from "@/providers/TimerContext";
-import { Play, Pause, Square, Clock, ChevronDown, Flame, Link as LinkIcon } from "lucide-react";
+import { Play, Pause, Square, Clock, ChevronDown, Flame, Link as LinkIcon, Edit3 } from "lucide-react";
 import { NoteCategory } from "@/types";
 
 export default function StudyTimerWidget() {
@@ -11,6 +11,7 @@ export default function StudyTimerWidget() {
     elapsedSeconds,
     category,
     startTimer,
+    logManualSession,
     pauseTimer,
     resumeTimer,
     stopTimer,
@@ -20,6 +21,8 @@ export default function StudyTimerWidget() {
   const [selectedNoteId, setSelectedNoteId] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<NoteCategory>("Web Security");
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<"stopwatch" | "manual">("manual");
+  const [manualMinutes, setManualMinutes] = useState<number>(30);
 
   useEffect(() => {
     fetch("/api/notes")
@@ -38,12 +41,22 @@ export default function StudyTimerWidget() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const handleStart = () => {
+  const handleStartLive = () => {
     startTimer({
       mode: "stopwatch",
       targetMinutes: 0,
       linkedNoteId: selectedNoteId || undefined,
       category: selectedCategory,
+    });
+    setIsExpanded(false);
+  };
+
+  const handleLogManual = async () => {
+    if (!manualMinutes || manualMinutes <= 0) return;
+    await logManualSession({
+      durationMinutes: manualMinutes,
+      category: selectedCategory,
+      linkedNoteId: selectedNoteId || undefined,
     });
     setIsExpanded(false);
   };
@@ -91,69 +104,172 @@ export default function StudyTimerWidget() {
           </div>
         </div>
       ) : (
-        /* Idle Start Timer Control */
+        /* Idle Start / Log Study Time Control */
         <div className="relative">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="flex items-center gap-2 bg-[#111827] hover:bg-[#1a2336] border border-[#1f293d] hover:border-cyan-500/50 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-300 transition"
           >
             <Clock className="w-3.5 h-3.5 text-cyan-400" />
-            <span>STUDY TIMER</span>
+            <span>LOG STUDY TIME</span>
             <ChevronDown className="w-3 h-3 text-slate-500" />
           </button>
 
           {isExpanded && (
-            <div className="absolute right-0 top-full mt-2 w-72 bg-[#111827] border border-[#1f293d] rounded-xl shadow-2xl p-4 z-50 text-xs font-mono space-y-3">
+            <div className="absolute right-0 top-full mt-2 w-80 bg-[#111827] border border-[#1f293d] rounded-xl shadow-2xl p-4 z-50 text-xs font-mono space-y-3">
               <div className="flex items-center justify-between text-slate-300 border-b border-slate-800 pb-2">
                 <span className="font-bold text-white flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-cyan-400" /> Start Study Session
+                  <Clock className="w-3.5 h-3.5 text-cyan-400" /> Log Study Session
                 </span>
               </div>
 
-              {/* Category Dropdown */}
-              <div>
-                <label className="block text-[10px] text-slate-400 uppercase mb-1">Target Category</label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value as NoteCategory)}
-                  className="w-full bg-[#090d16] border border-slate-800 rounded px-2.5 py-1.5 text-white text-xs focus:border-cyan-500 focus:outline-none"
+              {/* Mode Selector Tabs */}
+              <div className="flex bg-[#090d16] p-1 rounded-lg border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("manual")}
+                  className={`flex-1 py-1 rounded text-[11px] font-bold transition flex items-center justify-center gap-1 ${
+                    activeTab === "manual" ? "bg-cyan-600 text-white" : "text-slate-400 hover:text-slate-200"
+                  }`}
                 >
-                  <option value="Web Security">Web Security</option>
-                  <option value="Linux">Linux</option>
-                  <option value="Active Directory">Active Directory</option>
-                  <option value="SOC">SOC</option>
-                  <option value="Networking">Networking</option>
-                  <option value="Pentesting">Pentesting</option>
-                  <option value="General">General</option>
-                </select>
+                  <Edit3 className="w-3 h-3" /> Manual Entry
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("stopwatch")}
+                  className={`flex-1 py-1 rounded text-[11px] font-bold transition flex items-center justify-center gap-1 ${
+                    activeTab === "stopwatch" ? "bg-cyan-600 text-white" : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <Play className="w-3 h-3" /> Live Stopwatch
+                </button>
               </div>
 
-              {/* Optional Linked Note */}
-              <div>
-                <label className="block text-[10px] text-slate-400 uppercase mb-1 flex items-center gap-1">
-                  <LinkIcon className="w-2.5 h-2.5 text-cyan-400" /> Link Note (Optional)
-                </label>
-                <select
-                  value={selectedNoteId}
-                  onChange={(e) => setSelectedNoteId(e.target.value)}
-                  className="w-full bg-[#090d16] border border-slate-800 rounded px-2.5 py-1.5 text-white text-xs focus:border-cyan-500 focus:outline-none truncate"
-                >
-                  <option value="">-- None --</option>
-                  {notes.map((n) => (
-                    <option key={n.id} value={n.id}>
-                      {n.icon} {n.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {activeTab === "manual" ? (
+                /* MANUAL TIME ENTRY FORM */
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">
+                      Duration Studied (Minutes)
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={480}
+                      value={manualMinutes}
+                      onChange={(e) => setManualMinutes(Math.max(1, Number(e.target.value)))}
+                      className="w-full bg-[#090d16] border border-slate-800 rounded px-2.5 py-1.5 text-white text-xs focus:border-cyan-500 focus:outline-none"
+                    />
+                    <div className="flex items-center gap-1 mt-1.5">
+                      {[15, 30, 45, 60, 90].map((mins) => (
+                        <button
+                          key={mins}
+                          type="button"
+                          onClick={() => setManualMinutes(mins)}
+                          className={`flex-1 py-0.5 rounded text-[10px] border transition ${
+                            manualMinutes === mins
+                              ? "bg-cyan-950 border-cyan-700 text-cyan-300 font-bold"
+                              : "bg-[#090d16] border-slate-800 text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          {mins}m
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              <button
-                type="button"
-                onClick={handleStart}
-                className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-600/20"
-              >
-                <Play className="w-3.5 h-3.5 fill-current" /> START TIMER
-              </button>
+                  {/* Category Dropdown */}
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Target Category</label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value as NoteCategory)}
+                      className="w-full bg-[#090d16] border border-slate-800 rounded px-2.5 py-1.5 text-white text-xs focus:border-cyan-500 focus:outline-none"
+                    >
+                      <option value="Web Security">Web Security</option>
+                      <option value="Linux">Linux</option>
+                      <option value="Active Directory">Active Directory</option>
+                      <option value="SOC">SOC</option>
+                      <option value="Networking">Networking</option>
+                      <option value="Pentesting">Pentesting</option>
+                      <option value="General">General</option>
+                    </select>
+                  </div>
+
+                  {/* Optional Linked Note */}
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1 flex items-center gap-1">
+                      <LinkIcon className="w-2.5 h-2.5 text-cyan-400" /> Link Note (Optional)
+                    </label>
+                    <select
+                      value={selectedNoteId}
+                      onChange={(e) => setSelectedNoteId(e.target.value)}
+                      className="w-full bg-[#090d16] border border-slate-800 rounded px-2.5 py-1.5 text-white text-xs focus:border-cyan-500 focus:outline-none truncate"
+                    >
+                      <option value="">-- None --</option>
+                      {notes.map((n) => (
+                        <option key={n.id} value={n.id}>
+                          {n.icon} {n.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleLogManual}
+                    className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-600/20"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" /> LOG {manualMinutes} MINS & REFLECT
+                  </button>
+                </div>
+              ) : (
+                /* LIVE STOPWATCH FORM */
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Target Category</label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value as NoteCategory)}
+                      className="w-full bg-[#090d16] border border-slate-800 rounded px-2.5 py-1.5 text-white text-xs focus:border-cyan-500 focus:outline-none"
+                    >
+                      <option value="Web Security">Web Security</option>
+                      <option value="Linux">Linux</option>
+                      <option value="Active Directory">Active Directory</option>
+                      <option value="SOC">SOC</option>
+                      <option value="Networking">Networking</option>
+                      <option value="Pentesting">Pentesting</option>
+                      <option value="General">General</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1 flex items-center gap-1">
+                      <LinkIcon className="w-2.5 h-2.5 text-cyan-400" /> Link Note (Optional)
+                    </label>
+                    <select
+                      value={selectedNoteId}
+                      onChange={(e) => setSelectedNoteId(e.target.value)}
+                      className="w-full bg-[#090d16] border border-slate-800 rounded px-2.5 py-1.5 text-white text-xs focus:border-cyan-500 focus:outline-none truncate"
+                    >
+                      <option value="">-- None --</option>
+                      {notes.map((n) => (
+                        <option key={n.id} value={n.id}>
+                          {n.icon} {n.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleStartLive}
+                    className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-600/20"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" /> START LIVE STOPWATCH
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

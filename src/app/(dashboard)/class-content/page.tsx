@@ -15,8 +15,8 @@ import {
   Search,
   Shield,
   Loader2,
-  Clock,
   Sparkles,
+  FilterX,
 } from "lucide-react";
 import { NoteCategory } from "@/types";
 
@@ -40,6 +40,7 @@ export default function ClassContentPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("All Categories");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDateFilter, setSelectedDateFilter] = useState("");
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -185,12 +186,20 @@ export default function ClassContentPage() {
 
   const filteredItems = classContents.filter((item) => {
     const matchesCategory = activeTab === "All Categories" || item.category === activeTab;
+
+    let matchesDate = true;
+    if (selectedDateFilter) {
+      const itemDateStr = new Date(item.classDate).toISOString().split("T")[0];
+      matchesDate = itemDateStr === selectedDateFilter;
+    }
+
     const query = searchQuery.toLowerCase();
     const matchesSearch =
       item.title.toLowerCase().includes(query) ||
       item.description.toLowerCase().includes(query) ||
       item.category.toLowerCase().includes(query);
-    return matchesCategory && matchesSearch;
+
+    return matchesCategory && matchesDate && matchesSearch;
   });
 
   return (
@@ -219,8 +228,9 @@ export default function ClassContentPage() {
         )}
       </div>
 
-      {/* Category Tabs & Search */}
+      {/* Category Tabs, Calendar Date Filter & Search */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        {/* Category Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
           {CATEGORY_TABS.map((tab) => (
             <button
@@ -237,15 +247,40 @@ export default function ClassContentPage() {
           ))}
         </div>
 
-        <div className="relative w-full md:w-64 shrink-0">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search topics & labs..."
-            className="w-full bg-[#111827] border border-[#1f293d] focus:border-cyan-500 text-white text-xs rounded-lg pl-9 pr-3 py-2 focus:outline-none transition"
-          />
+        {/* Date Filter & Search Bar */}
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 shrink-0">
+          {/* Calendar Picker Filter */}
+          <div className="flex items-center gap-1.5 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-44">
+              <input
+                type="date"
+                value={selectedDateFilter}
+                onChange={(e) => setSelectedDateFilter(e.target.value)}
+                className="w-full bg-[#111827] border border-[#1f293d] focus:border-cyan-500 text-white text-xs rounded-lg px-3 py-2 focus:outline-none transition"
+              />
+            </div>
+            {selectedDateFilter && (
+              <button
+                onClick={() => setSelectedDateFilter("")}
+                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition"
+                title="Clear Date Filter"
+              >
+                <FilterX className="w-4 h-4 text-cyan-400" />
+              </button>
+            )}
+          </div>
+
+          {/* Keyword Search Input */}
+          <div className="relative w-full sm:w-56 shrink-0">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search topics & labs..."
+              className="w-full bg-[#111827] border border-[#1f293d] focus:border-cyan-500 text-white text-xs rounded-lg pl-9 pr-3 py-2 focus:outline-none transition"
+            />
+          </div>
         </div>
       </div>
 
@@ -257,8 +292,16 @@ export default function ClassContentPage() {
           <Sparkles className="w-10 h-10 text-slate-600 mx-auto" />
           <h3 className="text-sm font-bold text-white">No Class Content Found</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            No class content entries match the selected filters.
+            No class content entries match your selected date or category filter.
           </p>
+          {selectedDateFilter && (
+            <button
+              onClick={() => setSelectedDateFilter("")}
+              className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-lg transition"
+            >
+              Reset Date Filter
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -284,7 +327,7 @@ export default function ClassContentPage() {
                     {item.category}
                   </span>
 
-                  {idx === 0 && (
+                  {idx === 0 && !selectedDateFilter && (
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 border border-emerald-700 text-emerald-300">
                       LATEST CLASS
                     </span>

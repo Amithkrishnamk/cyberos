@@ -13,6 +13,12 @@ interface StartTimerOptions {
   category?: string;
 }
 
+interface ManualSessionOptions {
+  durationMinutes: number;
+  category: string;
+  linkedNoteId?: string;
+}
+
 interface TimerContextType {
   mode: TimerMode;
   status: TimerStatus;
@@ -25,6 +31,7 @@ interface TimerContextType {
   showFeedbackModal: boolean;
   abandonedSession: any | null;
   startTimer: (options: StartTimerOptions) => Promise<void>;
+  logManualSession: (options: ManualSessionOptions) => Promise<void>;
   pauseTimer: () => void;
   resumeTimer: () => void;
   stopTimer: () => void;
@@ -136,6 +143,32 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const logManualSession = async (options: ManualSessionOptions) => {
+    setCategory(options.category || "Web Security");
+    setLinkedNoteId(options.linkedNoteId || null);
+    setElapsedSeconds(options.durationMinutes * 60);
+
+    try {
+      const res = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          linkedNoteId: options.linkedNoteId,
+          category: options.category,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.studySession) {
+        setActiveSessionId(data.studySession.id);
+        setStatus("stopped");
+        setShowFeedbackModal(true);
+      }
+    } catch (err) {
+      console.error("Failed to log manual session:", err);
+    }
+  };
+
   const pauseTimer = () => {
     setStatus("paused");
   };
@@ -207,7 +240,6 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     setAbandonedSession(null);
   };
 
-  // Clean Termination on Logout: auto-closes active timer before signing out
   const terminateAndSignOut = async () => {
     if (activeSessionId) {
       try {
@@ -242,6 +274,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
         showFeedbackModal,
         abandonedSession,
         startTimer,
+        logManualSession,
         pauseTimer,
         resumeTimer,
         stopTimer,

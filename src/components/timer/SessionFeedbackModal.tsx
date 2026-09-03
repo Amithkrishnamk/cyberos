@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useTimer } from "@/providers/TimerContext";
-import { CheckCircle2, MessageSquare, AlertTriangle, ArrowRight, Lock } from "lucide-react";
+import { CheckCircle2, MessageSquare, AlertTriangle, ArrowRight, Lock, Check } from "lucide-react";
 
 export default function SessionFeedbackModal() {
-  const { showFeedbackModal, category, completeSession } = useTimer();
+  const { showFeedbackModal, category, completeSession, skipFeedback } = useTimer();
 
   const [contentStudied, setContentStudied] = useState("");
   const [difficulties, setDifficulties] = useState("");
@@ -37,6 +37,14 @@ export default function SessionFeedbackModal() {
     setSubmitted(true);
   };
 
+  const handleDoneClose = async () => {
+    await skipFeedback();
+    setSubmitted(false);
+    setContentStudied("");
+    setDifficulties("");
+    setNextSteps("");
+  };
+
   return (
     <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
       <div className="w-full max-w-lg bg-[#111827] border border-cyan-500/40 rounded-2xl shadow-2xl p-6 relative font-mono text-slate-200">
@@ -64,12 +72,22 @@ export default function SessionFeedbackModal() {
         )}
 
         {submitted ? (
-          <div className="py-8 flex flex-col items-center text-center space-y-3">
+          <div className="py-6 flex flex-col items-center text-center space-y-4">
             <CheckCircle2 className="w-12 h-12 text-emerald-400 animate-bounce" />
-            <h3 className="text-lg font-bold text-white">Reflection Saved Successfully!</h3>
-            <p className="text-xs text-slate-400">
-              Your study reflection has been logged into your profile and instructor dashboard.
-            </p>
+            <div>
+              <h3 className="text-lg font-bold text-white">Reflection Saved Successfully!</h3>
+              <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                Your study reflection and verified time log have been saved to your profile and instructor dashboard.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDoneClose}
+              className="mt-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition flex items-center gap-2 text-xs shadow-lg shadow-emerald-600/20"
+            >
+              <Check className="w-4 h-4" /> Close & Continue
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
