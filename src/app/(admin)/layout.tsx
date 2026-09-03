@@ -12,6 +12,7 @@ import SessionFeedbackModal from "@/components/timer/SessionFeedbackModal";
 import AbandonedSessionPrompt from "@/components/timer/AbandonedSessionPrompt";
 import {
   LayoutDashboard,
+  Calendar,
   BookOpen,
   CheckSquare,
   Clock,
@@ -34,6 +35,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Class Content", href: "/class-content", icon: Calendar },
     { name: "Notes & Docs", href: "/notes", icon: BookOpen },
     { name: "Lab Tracker", href: "/labs", icon: CheckSquare },
     { name: "Study Sessions", href: "/sessions", icon: Clock },

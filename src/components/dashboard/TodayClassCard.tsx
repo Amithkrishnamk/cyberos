@@ -2,17 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import {
   BookOpen,
   Edit3,
   ExternalLink,
-  Sparkles,
   AlertCircle,
   X,
   Save,
   Clock,
   Shield,
   Loader2,
+  Calendar,
+  ArrowRight,
 } from "lucide-react";
 import { NoteCategory } from "@/types";
 
@@ -38,13 +40,14 @@ export default function TodayClassCard() {
     try {
       const res = await fetch("/api/class-content");
       const data = await res.json();
-      if (data.classContent) {
-        setClassContent(data.classContent);
-        setTitle(data.classContent.title);
-        setCategory(data.classContent.category);
-        setDescription(data.classContent.description);
-        setLabUrl(data.classContent.labUrl);
-        setKeyNotice(data.classContent.keyNotice);
+      const latest = data.latestClass || (data.classContents && data.classContents[0]) || null;
+      if (latest) {
+        setClassContent(latest);
+        setTitle(latest.title);
+        setCategory(latest.category);
+        setDescription(latest.description);
+        setLabUrl(latest.labUrl || "");
+        setKeyNotice(latest.keyNotice || "");
       }
     } catch (err) {
       console.error("Failed to load class content:", err);
@@ -59,11 +62,12 @@ export default function TodayClassCard() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!classContent?.id) return;
     setFormError("");
     setSaving(true);
 
     try {
-      const res = await fetch("/api/class-content", {
+      const res = await fetch(`/api/class-content/${classContent.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -117,7 +121,7 @@ export default function TodayClassCard() {
                 {classContent.category}
               </span>
               <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-slate-500" /> Updated: {new Date(classContent.updatedAt).toLocaleDateString()}
+                <Calendar className="w-3 h-3 text-slate-500" /> Class Date: {new Date(classContent.classDate).toLocaleDateString()}
               </span>
             </div>
             <h2 className="text-lg font-bold text-white tracking-wide mt-1">
@@ -126,14 +130,23 @@ export default function TodayClassCard() {
           </div>
         </div>
 
-        {isAdmin && (
-          <button
-            onClick={() => setShowEditModal(true)}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-xl border border-cyan-800/50 transition flex items-center gap-1.5 shrink-0"
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            href="/class-content"
+            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700 transition flex items-center gap-1"
           >
-            <Edit3 className="w-3.5 h-3.5" /> EDIT CLASS CONTENT
-          </button>
-        )}
+            <span>View All Class Timeline</span> <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+
+          {isAdmin && (
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="px-3 py-2 bg-cyan-950 hover:bg-cyan-900 text-cyan-300 font-bold text-xs rounded-xl border border-cyan-800/50 transition flex items-center gap-1.5"
+            >
+              <Edit3 className="w-3.5 h-3.5" /> EDIT TODAY'S CLASS
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Topic Title & Syllabus Description */}

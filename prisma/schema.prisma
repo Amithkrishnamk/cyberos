@@ -77,12 +77,14 @@ model Concept {
   lastRevise  DateTime @default(now())
 }
 
-model ClassContent {
-  id          String   @id @default("today-class")
-  title       String   @default("Web Security: Advanced SQL Injection & Union Exploitation")
+model DailyClassContent {
+  id          String   @id @default(uuid())
+  title       String
   category    String   @default("Web Security")
-  description String   @default("Today's focus: Identifying column counts using UNION NULL injection, extracting database metadata, and practicing PortSwigger SQLi labs.")
-  labUrl      String   @default("https://portswigger.net/web-security/sql-injection")
-  keyNotice   String   @default("Please log your study session timer and submit your mandatory end-of-session reflection log after completing today's lab.")
-  updatedAt   DateTime @default(now()) @updatedAt
+  description String
+  labUrl      String   @default("")
+  keyNotice   String   @default("")
+  classDate   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
