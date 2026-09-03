@@ -37,6 +37,7 @@ interface TimerContextType {
   stopTimer: () => void;
   completeSession: (feedback: { contentStudied: string; difficulties: string; nextSteps: string }) => Promise<void>;
   skipFeedback: () => Promise<void>;
+  resetTimerState: () => void;
   closeAbandonedPrompt: () => void;
   terminateAndSignOut: () => Promise<void>;
 }
@@ -114,6 +115,16 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
       if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current);
     };
   }, [status, activeSessionId]);
+
+  const resetTimerState = useCallback(() => {
+    setStatus("idle");
+    setElapsedSeconds(0);
+    setActiveSessionId(null);
+    setStartedAt(null);
+    setShowFeedbackModal(false);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current);
+  }, []);
 
   const startTimer = async (options: StartTimerOptions) => {
     setMode(options.mode);
@@ -202,8 +213,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
       });
     } catch (err) {
       console.error("Failed to complete session:", err);
-    } finally {
-      resetTimerState();
+      throw err;
     }
   };
 
@@ -225,16 +235,6 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
       resetTimerState();
     }
   };
-
-  const resetTimerState = useCallback(() => {
-    setStatus("idle");
-    setElapsedSeconds(0);
-    setActiveSessionId(null);
-    setStartedAt(null);
-    setShowFeedbackModal(false);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current);
-  }, []);
 
   const closeAbandonedPrompt = () => {
     setAbandonedSession(null);
@@ -280,6 +280,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
         stopTimer,
         completeSession,
         skipFeedback,
+        resetTimerState,
         closeAbandonedPrompt,
         terminateAndSignOut,
       }}

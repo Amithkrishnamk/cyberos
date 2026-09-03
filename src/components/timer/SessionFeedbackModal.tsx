@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTimer } from "@/providers/TimerContext";
 import { CheckCircle2, MessageSquare, AlertTriangle, ArrowRight, Lock, Check } from "lucide-react";
 
 export default function SessionFeedbackModal() {
-  const { showFeedbackModal, category, completeSession, skipFeedback } = useTimer();
+  const { showFeedbackModal, category, completeSession, resetTimerState } = useTimer();
 
   const [contentStudied, setContentStudied] = useState("");
   const [difficulties, setDifficulties] = useState("");
@@ -13,6 +13,18 @@ export default function SessionFeedbackModal() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formError, setFormError] = useState("");
+
+  // Always reset form state & ensure Image 1 (Form) shows whenever modal opens
+  useEffect(() => {
+    if (showFeedbackModal) {
+      setSubmitted(false);
+      setContentStudied("");
+      setDifficulties("");
+      setNextSteps("");
+      setFormError("");
+      setLoading(false);
+    }
+  }, [showFeedbackModal]);
 
   if (!showFeedbackModal) return null;
 
@@ -27,22 +39,25 @@ export default function SessionFeedbackModal() {
 
     setLoading(true);
 
-    await completeSession({
-      contentStudied: contentStudied.trim(),
-      difficulties: difficulties.trim(),
-      nextSteps: nextSteps.trim(),
-    });
+    try {
+      await completeSession({
+        contentStudied: contentStudied.trim(),
+        difficulties: difficulties.trim(),
+        nextSteps: nextSteps.trim(),
+      });
 
-    setLoading(false);
-    setSubmitted(true);
+      // Show Image 2 (Success Screen) after successful API save
+      setSubmitted(true);
+    } catch (err) {
+      setFormError("Failed to save reflection. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDoneClose = async () => {
-    await skipFeedback();
+  const handleDoneClose = () => {
+    resetTimerState();
     setSubmitted(false);
-    setContentStudied("");
-    setDifficulties("");
-    setNextSteps("");
   };
 
   return (
@@ -72,6 +87,7 @@ export default function SessionFeedbackModal() {
         )}
 
         {submitted ? (
+          /* Image 2: Success Screen */
           <div className="py-6 flex flex-col items-center text-center space-y-4">
             <CheckCircle2 className="w-12 h-12 text-emerald-400 animate-bounce" />
             <div>
@@ -90,6 +106,7 @@ export default function SessionFeedbackModal() {
             </button>
           </div>
         ) : (
+          /* Image 1: Form Screen */
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs text-cyan-400 font-bold mb-1">
