@@ -16,20 +16,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<CyberTheme>("cyan");
 
   const applyThemeToDOM = (t: CyberTheme) => {
-    document.documentElement.setAttribute("data-theme", t);
-    if (document.body) {
-      document.body.setAttribute("data-theme", t);
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-theme", t);
+      if (document.body) {
+        document.body.setAttribute("data-theme", t);
+      }
     }
   };
 
   useEffect(() => {
     let activeTheme: CyberTheme = "cyan";
-    if (session?.user && (session.user as any).theme) {
+
+    const savedLocal = typeof window !== "undefined" ? (localStorage.getItem("cyber_theme") as CyberTheme) : null;
+    if (savedLocal) {
+      activeTheme = savedLocal;
+    } else if (session?.user && (session.user as any).theme) {
       activeTheme = (session.user as any).theme as CyberTheme;
-    } else {
-      const localTheme = localStorage.getItem("cyber_theme") as CyberTheme;
-      if (localTheme) activeTheme = localTheme;
     }
+
     setThemeState(activeTheme);
     applyThemeToDOM(activeTheme);
   }, [session]);
@@ -37,7 +41,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = async (newTheme: CyberTheme) => {
     setThemeState(newTheme);
     applyThemeToDOM(newTheme);
-    localStorage.setItem("cyber_theme", newTheme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("cyber_theme", newTheme);
+    }
 
     if (session?.user) {
       try {

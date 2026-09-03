@@ -86,33 +86,61 @@
   --cyber-heading: #ffffff;
 }
 
-body {
+html, body {
   background-color: var(--cyber-bg) !important;
   color: var(--cyber-text) !important;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   overflow-x: hidden;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Theme helper classes */
-.bg-cyber-bg {
+/* Global layout color overrides based on data-theme */
+[data-theme] .bg-\[\#090d16\] {
   background-color: var(--cyber-bg) !important;
 }
 
-.bg-cyber-surface {
+[data-theme] .bg-\[\#111827\] {
   background-color: var(--cyber-surface) !important;
 }
 
-.border-cyber-border {
+[data-theme] .bg-\[\#0d1322\]\/80,
+[data-theme] .bg-\[\#0d1322\] {
+  background-color: var(--cyber-surface) !important;
+}
+
+[data-theme] .border-\[\#1f293d\] {
   border-color: var(--cyber-border) !important;
 }
 
-.text-cyber-accent {
+[data-theme] .text-cyan-400 {
   color: var(--cyber-accent) !important;
 }
 
-.bg-cyber-accent {
+[data-theme] .text-cyan-300 {
+  color: var(--cyber-muted) !important;
+}
+
+[data-theme] .bg-cyan-600 {
   background-color: var(--cyber-accent) !important;
+}
+
+[data-theme] .bg-cyan-600:hover {
+  background-color: var(--cyber-accent-hover) !important;
+}
+
+[data-theme] .bg-cyan-500\/10,
+[data-theme] .bg-cyan-950\/80,
+[data-theme] .bg-cyan-950\/60,
+[data-theme] .bg-cyan-950 {
+  background-color: var(--cyber-accent-glow) !important;
+}
+
+[data-theme] .border-cyan-500\/40,
+[data-theme] .border-cyan-500\/30,
+[data-theme] .border-cyan-800\/60,
+[data-theme] .border-cyan-800\/50,
+[data-theme] .border-cyan-800\/40 {
+  border-color: var(--cyber-accent) !important;
 }
 
 /* Custom Scrollbar */
