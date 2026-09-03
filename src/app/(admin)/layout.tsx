@@ -75,9 +75,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Brand Logo Header */}
           <div className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-[#1f293d]">
             <img
-              src="/logo.png"
+              src="/logo.jpg"
               alt="Cyber OS Logo"
-              className="h-12 w-auto object-contain shrink-0 filter drop-shadow-md"
+              className="h-12 w-auto object-contain rounded-xl shrink-0"
             />
             <div>
               <h1 className="font-bold text-white tracking-wider font-mono text-base flex items-center gap-1 leading-tight">
