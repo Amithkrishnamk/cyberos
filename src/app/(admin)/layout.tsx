@@ -74,9 +74,11 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         <div>
           {/* Logo */}
           <div className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-[#1f293d]">
-            <div className="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold font-mono">
-              🛡️
-            </div>
+            <img
+              src="/logo.jpg"
+              alt="Cyber OS Logo"
+              className="w-10 h-10 rounded-xl object-contain bg-white/90 p-0.5 shadow-lg border border-red-500/30"
+            />
             <div>
               <h1 className="font-bold text-white tracking-wider font-mono text-sm flex items-center gap-1">
                 CYBER <span className="text-red-400">//</span> OS

@@ -53,7 +53,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     setSigningOut(true);
 
     try {
-      // Auto-close active timer session if running
       if (activeSessionId) {
         await fetch(`/api/sessions/${activeSessionId}/complete`, {
           method: "POST",
@@ -67,7 +66,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error("Logout timer cleanup error:", e);
     } finally {
-      // Clear localStorage theme fallback & call NextAuth signOut
       localStorage.removeItem("cyber_theme");
       await signOut({ callbackUrl: "/login", redirect: true });
       window.location.href = "/login";
@@ -81,9 +79,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         <div>
           {/* Logo */}
           <div className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-[#1f293d]">
-            <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold font-mono">
-              ⚡
-            </div>
+            <img
+              src="/logo.jpg"
+              alt="Cyber OS Logo"
+              className="w-10 h-10 rounded-xl object-contain bg-white/90 p-0.5 shadow-lg border border-cyan-500/30"
+            />
             <div>
               <h1 className="font-bold text-white tracking-wider font-mono text-sm flex items-center gap-1">
                 CYBER <span className="text-cyan-400">//</span> OS

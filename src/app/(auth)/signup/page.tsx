@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Shield, User, Mail, Lock, ArrowRight } from "lucide-react";
+import { User, Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -61,19 +61,21 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-[#e2e8f0] flex flex-col justify-center items-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#090d16] text-[#e2e8f0] flex flex-col justify-center items-center p-4 relative overflow-hidden font-mono">
       {/* Glow Effects */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-[#111827] border border-[#1f293d] rounded-xl shadow-2xl p-8 relative z-10">
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-3">
-            <Shield className="w-6 h-6" />
-          </div>
+      <div className="w-full max-w-md bg-[#111827] border border-[#1f293d] rounded-2xl shadow-2xl p-8 relative z-10">
+        <div className="flex flex-col items-center mb-6 text-center">
+          <img
+            src="/logo.jpg"
+            alt="CYBER OS Logo"
+            className="w-16 h-16 rounded-2xl object-contain bg-white/90 p-1 mb-3 shadow-xl border border-cyan-500/30"
+          />
           <h1 className="text-2xl font-bold text-white tracking-wider flex items-center gap-2">
             CYBER <span className="text-cyan-400">//</span> OS
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Register Student Operator Account</p>
+          <p className="text-xs text-slate-400 mt-1">Register Student Operator Account</p>
         </div>
 
         {error && (
