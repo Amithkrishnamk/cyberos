@@ -45,9 +45,9 @@ function LoginForm() {
     <div className="w-full max-w-md bg-[#111827] border border-[#1f293d] rounded-2xl shadow-2xl p-8 relative z-10 font-mono">
       <div className="flex flex-col items-center mb-6 text-center">
         <img
-          src="/logo.jpg"
+          src="/logo.png"
           alt="CYBER OS Logo"
-          className="w-16 h-16 rounded-2xl object-contain bg-white/90 p-1 mb-3 shadow-xl border border-cyan-500/30"
+          className="h-20 w-auto object-contain mb-3 filter drop-shadow-xl"
         />
         <h1 className="text-2xl font-bold text-white tracking-wider flex items-center gap-2">
           CYBER <span className="text-cyan-400">//</span> OS

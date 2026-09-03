@@ -72,15 +72,15 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-[#111827] border-b md:border-b-0 md:border-r border-[#1f293d] flex flex-col justify-between p-4 shrink-0">
         <div>
-          {/* Logo */}
+          {/* Brand Logo Header */}
           <div className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-[#1f293d]">
             <img
-              src="/logo.jpg"
+              src="/logo.png"
               alt="Cyber OS Logo"
-              className="w-10 h-10 rounded-xl object-contain bg-white/90 p-0.5 shadow-lg border border-red-500/30"
+              className="h-12 w-auto object-contain shrink-0 filter drop-shadow-md"
             />
             <div>
-              <h1 className="font-bold text-white tracking-wider font-mono text-sm flex items-center gap-1">
+              <h1 className="font-bold text-white tracking-wider font-mono text-base flex items-center gap-1 leading-tight">
                 CYBER <span className="text-red-400">//</span> OS
               </h1>
               <p className="text-[10px] text-red-400 font-mono">ADMIN CONTROL</p>
