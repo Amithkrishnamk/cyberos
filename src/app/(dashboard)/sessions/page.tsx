@@ -1,37 +1,52 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, MessageSquare, AlertTriangle, Calendar, BookOpen, Flame } from "lucide-react";
+import { useSession } from "next-auth/react";
+import DeleteSessionButton from "@/components/admin/DeleteSessionButton";
+import { Clock, BookOpen, Flame, Calendar, AlertTriangle } from "lucide-react";
 
 export default function StudySessionsPage() {
+  const { data: sessionData } = useSession();
+  const userRole = (sessionData?.user as any)?.role || "STUDENT";
+  const isAdmin = userRole === "ADMIN";
+
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadSessions() {
-      try {
-        const res = await fetch("/api/sessions");
-        const data = await res.json();
-        setSessions(data.sessions || []);
-      } catch (err) {
-        console.error("Error loading sessions:", err);
-      } finally {
-        setLoading(false);
-      }
+  async function loadSessions() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/sessions");
+      const data = await res.json();
+      setSessions(data.sessions || []);
+    } catch (err) {
+      console.error("Error loading sessions:", err);
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     loadSessions();
   }, []);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 font-mono">
-      <div className="border-b border-[#1f293d] pb-6">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Clock className="w-6 h-6 text-cyan-400" /> STUDY SESSIONS & REFLECTION LOGS
-        </h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Review your recorded study time, content studied, flagged difficulties, and next step reflections.
-        </p>
+      <div className="border-b border-[#1f293d] pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Clock className="w-6 h-6 text-cyan-400" /> STUDY SESSIONS & REFLECTION LOGS
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Review recorded study time, content studied, flagged difficulties, and next step reflections.
+          </p>
+        </div>
+
+        {isAdmin && (
+          <div className="px-3 py-1 bg-red-950/60 border border-red-800/60 text-red-400 rounded-lg text-xs font-bold shrink-0">
+            🛡 ADMIN REFLECTION MANAGEMENT ACTIVE
+          </div>
+        )}
       </div>
 
       {loading ? (
@@ -49,7 +64,7 @@ export default function StudySessionsPage() {
           {sessions.map((item) => (
             <div
               key={item.id}
-              className="bg-[#111827] border border-[#1f293d] rounded-2xl p-6 shadow-xl space-y-3"
+              className="bg-[#111827] border border-[#1f293d] hover:border-cyan-500/40 rounded-2xl p-6 shadow-xl space-y-3 transition group relative"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
@@ -59,6 +74,11 @@ export default function StudySessionsPage() {
                   {item.linkedNote?.title && (
                     <span className="text-xs text-slate-300 font-bold flex items-center gap-1">
                       <BookOpen className="w-3.5 h-3.5 text-cyan-400" /> {item.linkedNote.title}
+                    </span>
+                  )}
+                  {item.user?.name && isAdmin && (
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 font-bold border border-slate-700">
+                      Student: {item.user.name}
                     </span>
                   )}
                 </div>
@@ -72,6 +92,9 @@ export default function StudySessionsPage() {
                     <Calendar className="w-3.5 h-3.5" />
                     {new Date(item.startedAt).toLocaleString()}
                   </span>
+
+                  {/* Admin or Session Owner Delete Button */}
+                  <DeleteSessionButton sessionId={item.id} onDeleted={loadSessions} />
                 </div>
               </div>
 

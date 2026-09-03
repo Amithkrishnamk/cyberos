@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import DeleteSessionButton from "@/components/admin/DeleteSessionButton";
 import {
   ShieldAlert,
   User,
@@ -134,7 +135,7 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
               return (
                 <div
                   key={sessionItem.id}
-                  className="bg-[#090d16] border border-slate-800 rounded-xl p-4 space-y-3"
+                  className="bg-[#090d16] border border-slate-800 rounded-xl p-4 space-y-3 relative group"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
                     <div className="flex items-center gap-2">
@@ -147,12 +148,13 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
                         </span>
                       )}
                     </div>
-                    <div className="text-[10px] text-emerald-400 flex items-center gap-3">
+                    <div className="flex items-center gap-3 text-[10px] text-emerald-400">
                       <span>Duration: {sessionItem.durationMinutes} mins</span>
                       <span className="text-slate-500">•</span>
                       <span className="text-slate-400">
                         {new Date(sessionItem.startedAt).toLocaleString()}
                       </span>
+                      <DeleteSessionButton sessionId={sessionItem.id} />
                     </div>
                   </div>
 
