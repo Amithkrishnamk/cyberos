@@ -40,7 +40,7 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const { name, theme } = body;
 
-    const validThemes = ["cyan", "emerald", "violet", "amber", "red", "stealth"];
+    const validThemes = ["cyan", "emerald", "violet", "amber", "red", "stealth", "light"];
     if (theme && !validThemes.includes(theme)) {
       return NextResponse.json({ error: "Invalid theme" }, { status: 400 });
     }

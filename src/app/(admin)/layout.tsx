@@ -8,6 +8,7 @@ import AuthProvider from "@/providers/AuthProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { TimerProvider, useTimer } from "@/providers/TimerContext";
 import StudyTimerWidget from "@/components/timer/StudyTimerWidget";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 import SessionFeedbackModal from "@/components/timer/SessionFeedbackModal";
 import AbandonedSessionPrompt from "@/components/timer/AbandonedSessionPrompt";
 import {
@@ -173,6 +174,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-2">
             <StudyTimerWidget />
+            <ThemeToggle />
 
             <button
               type="button"
@@ -269,16 +271,22 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Desktop Top Header Bar */}
         <header className="hidden md:flex h-16 border-b border-[#1f293d] bg-[#0d1322]/80 backdrop-blur-md px-6 items-center justify-between sticky top-0 z-40">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <span className="text-red-400">ROLE:</span> ADMIN PRIVILEGED
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+              <span className="text-red-400 font-bold">ROLE:</span> ADMIN PRIVILEGED
+            </div>
+            <span className="text-slate-600">|</span>
+            <div className="text-slate-400 text-[11px]">NETWORKING: ACTIVE</div>
           </div>
 
           <div className="flex items-center gap-4">
             <StudyTimerWidget />
+            <ThemeToggle />
           </div>
         </header>
 
-        {/* Dynamic Page Content (extra bottom padding for mobile floating dock) */}
+        {/* Dynamic Page Content */}
         <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-y-auto">{children}</main>
 
         {/* Mobile Floating Cyber Dock Navigation */}

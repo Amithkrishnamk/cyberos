@@ -1,6 +1,6 @@
 export type UserRole = "STUDENT" | "ADMIN";
 
-export type CyberTheme = "cyan" | "emerald" | "violet" | "amber" | "red" | "stealth";
+export type CyberTheme = "cyan" | "emerald" | "violet" | "amber" | "red" | "stealth" | "light";
 
 export type NoteCategory =
   | "Web Security"
