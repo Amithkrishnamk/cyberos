@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import TodayClassCard from "@/components/dashboard/TodayClassCard";
+import { calculateStudyStreak } from "@/lib/streak";
 import {
   BookOpen,
   Clock,
@@ -24,7 +25,7 @@ export default function DashboardPage() {
     totalHours: 0,
     notesCount: 0,
     labsCount: 0,
-    streakDays: 1,
+    streakDays: 0,
   });
   const [recentNotes, setRecentNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,12 +52,13 @@ export default function DashboardPage() {
           0
         );
         const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
+        const streakDays = calculateStudyStreak(sessionsList);
 
         setStats({
           totalHours,
           notesCount: notesList.length,
           labsCount: labsList.length,
-          streakDays: sessionsList.length > 0 ? Math.min(sessionsList.length, 7) : 1,
+          streakDays,
         });
 
         setRecentNotes(notesList.slice(0, 5));
@@ -154,8 +156,12 @@ export default function DashboardPage() {
             <span className="text-xs">STUDY STREAK</span>
             <Flame className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-2xl font-bold text-white">{stats.streakDays} <span className="text-xs text-slate-400 font-normal">DAYS</span></div>
-          <div className="text-[10px] text-amber-400 mt-2">Active learning momentum</div>
+          <div className="text-2xl font-bold text-white">
+            {stats.streakDays} <span className="text-xs text-slate-400 font-normal">DAYS 🔥</span>
+          </div>
+          <div className="text-[10px] text-amber-400 mt-2">
+            {stats.streakDays > 0 ? `${stats.streakDays}-day consecutive study streak!` : "Log a session today to start your streak!"}
+          </div>
         </div>
       </div>
 

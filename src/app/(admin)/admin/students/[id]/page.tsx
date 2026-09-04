@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import DeleteSessionButton from "@/components/admin/DeleteSessionButton";
+import { calculateStudyStreak } from "@/lib/streak";
 import {
   ShieldAlert,
   User,
@@ -14,6 +15,7 @@ import {
   ArrowLeft,
   Calendar,
   MessageSquare,
+  Flame,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +45,7 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
     0
   );
   const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
+  const streakDays = calculateStudyStreak(student.studySessions);
 
   // Map notes lookup for linked note title
   const notesMap = new Map(student.notes.map((n) => [n.id, n.title]));
@@ -91,11 +94,11 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
       </div>
 
       {/* Overview Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-[#111827] border border-[#1f293d] rounded-xl p-5">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs">TOTAL STUDY TIME</span>
-            <Clock className="w-4 h-4 text-emerald-400" />
+            <Clock className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-2xl font-bold text-white">{totalHours} <span className="text-xs text-slate-400 font-normal">HRS</span></div>
         </div>
@@ -103,7 +106,7 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
         <div className="bg-[#111827] border border-[#1f293d] rounded-xl p-5">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs">NOTES & DOCS</span>
-            <BookOpen className="w-4 h-4 text-cyan-400" />
+            <BookOpen className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl font-bold text-white">{student.notes.length}</div>
         </div>
@@ -111,9 +114,17 @@ export default async function AdminStudentDetailPage({ params }: { params: { id:
         <div className="bg-[#111827] border border-[#1f293d] rounded-xl p-5">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs">LABS COMPLETED</span>
-            <CheckSquare className="w-4 h-4 text-amber-400" />
+            <CheckSquare className="w-4 h-4 text-violet-400" />
           </div>
           <div className="text-2xl font-bold text-white">{student.labCompletions.length}</div>
+        </div>
+
+        <div className="bg-[#111827] border border-[#1f293d] rounded-xl p-5">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs">STUDY STREAK</span>
+            <Flame className="w-4 h-4 text-amber-400" />
+          </div>
+          <div className="text-2xl font-bold text-white">{streakDays} <span className="text-xs text-slate-400 font-normal">DAYS 🔥</span></div>
         </div>
       </div>
 
