@@ -21,6 +21,9 @@ import {
   Users,
   LogOut,
   Loader2,
+  Menu,
+  X,
+  Flame,
 } from "lucide-react";
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
@@ -28,6 +31,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const { activeSessionId } = useTimer();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
   const userRole = (session?.user as any)?.role || "STUDENT";
@@ -48,6 +52,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       { name: "User Management", href: "/admin/users", icon: Users }
     );
   }
+
+  // Quick nav items for bottom mobile dock
+  const bottomNavPills = [
+    { name: "Home", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Class", href: "/class-content", icon: Calendar },
+    { name: "Notes", href: "/notes", icon: BookOpen },
+    { name: "Labs", href: "/labs", icon: CheckSquare },
+    { name: "Sessions", href: "/sessions", icon: Clock },
+  ];
 
   const handleLogout = async () => {
     setSigningOut(true);
@@ -73,9 +86,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-[#e2e8f0] flex flex-col md:flex-row">
-      {/* Sidebar / Top Navigation */}
-      <aside className="w-full md:w-64 bg-[#111827] border-b md:border-b-0 md:border-r border-[#1f293d] flex flex-col justify-between p-4 shrink-0">
+    <div className="min-h-screen bg-[#090d16] text-[#e2e8f0] flex flex-col md:flex-row font-mono">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 bg-[#111827] border-r border-[#1f293d] flex-col justify-between p-4 shrink-0">
         <div>
           {/* Brand Logo Header */}
           <div className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-[#1f293d]">
@@ -85,10 +98,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               className="h-12 w-auto object-contain rounded-xl shrink-0"
             />
             <div>
-              <h1 className="font-bold text-white tracking-wider font-mono text-base flex items-center gap-1 leading-tight">
+              <h1 className="font-bold text-white tracking-wider text-base flex items-center gap-1 leading-tight">
                 CYBER <span className="text-cyan-400">//</span> OS
               </h1>
-              <p className="text-[10px] text-slate-400 font-mono">OPERATOR PLATFORM</p>
+              <p className="text-[10px] text-slate-400">OPERATOR PLATFORM</p>
             </div>
           </div>
 
@@ -96,14 +109,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <nav className="space-y-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = pathname === link.href || (link.href !== "/admin" && pathname.startsWith(`${link.href}/`));
+              const isActive =
+                pathname === link.href || (link.href !== "/admin" && pathname.startsWith(`${link.href}/`));
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-mono transition ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition ${
                     isActive
-                      ? "bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 font-bold"
+                      ? "bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 font-bold shadow-sm shadow-cyan-500/10"
                       : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
@@ -118,12 +132,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         {/* User Card & Sign Out */}
         <div className="pt-4 border-t border-[#1f293d] mt-6">
           <div className="flex items-center gap-3 px-2 mb-3">
-            <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs font-bold">
+            <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs font-bold shrink-0">
               {userName.substring(0, 2).toUpperCase()}
             </div>
             <div className="overflow-hidden">
               <div className="text-xs font-bold text-white truncate">{userName}</div>
-              <div className="text-[10px] text-cyan-400 font-mono flex items-center gap-1">
+              <div className="text-[10px] text-cyan-400 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                 {userRole}
               </div>
@@ -134,7 +148,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             type="button"
             onClick={handleLogout}
             disabled={signingOut}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-mono text-slate-400 hover:text-red-400 hover:bg-red-950/20 border border-transparent hover:border-red-900/40 transition disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-red-400 hover:bg-red-950/20 border border-transparent hover:border-red-900/40 transition disabled:opacity-50"
           >
             {signingOut ? (
               <>
@@ -152,10 +166,114 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header Bar with Global Study Timer */}
-        <header className="h-16 border-b border-[#1f293d] bg-[#0d1322]/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-40">
-          <div className="flex items-center gap-2 font-mono text-xs text-slate-400">
+      <div className="flex-1 flex flex-col min-w-0 relative">
+        {/* Mobile Top Header */}
+        <header className="md:hidden h-16 border-b border-[#1f293d] bg-[#090d16]/90 backdrop-blur-xl px-4 flex items-center justify-between sticky top-0 z-40">
+          <div className="flex items-center gap-2.5">
+            <img src="/logo.jpg" alt="Logo" className="h-9 w-auto rounded-lg object-contain" />
+            <span className="font-bold text-white text-sm tracking-wider">
+              CYBER <span className="text-cyan-400">//</span> OS
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <StudyTimerWidget />
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 text-cyan-400 hover:bg-slate-700 active:scale-95 transition"
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </header>
+
+        {/* Mobile Slide-Over Menu Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-50 flex">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Side Drawer Sheet */}
+            <div className="relative w-4/5 max-w-xs bg-[#111827] border-r border-cyan-500/30 p-5 flex flex-col justify-between z-10 shadow-2xl animate-in slide-in-from-left duration-200">
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <img src="/logo.jpg" alt="Logo" className="h-10 w-auto rounded-xl" />
+                    <div>
+                      <h2 className="font-bold text-white text-sm">CYBER // OS</h2>
+                      <p className="text-[10px] text-cyan-400">MOBILE OPERATOR HUB</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-1.5 text-slate-400 hover:text-white"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Nav Links */}
+                <nav className="space-y-1.5">
+                  {navLinks.map((link) => {
+                    const Icon = link.icon;
+                    const isActive =
+                      pathname === link.href ||
+                      (link.href !== "/admin" && pathname.startsWith(`${link.href}/`));
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs transition ${
+                          isActive
+                            ? "bg-cyan-500/15 border border-cyan-500/40 text-cyan-400 font-bold"
+                            : "text-slate-300 hover:bg-slate-800/80"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 text-cyan-400" />
+                        <span>{link.name}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              {/* User Logout Footer */}
+              <div className="border-t border-slate-800 pt-4 mt-6">
+                <div className="flex items-center gap-3 px-2 mb-3">
+                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs font-bold">
+                    {userName.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div className="overflow-hidden">
+                    <div className="text-xs font-bold text-white truncate">{userName}</div>
+                    <div className="text-[10px] text-cyan-400">{userRole}</div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={signingOut}
+                  className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs bg-red-950/40 border border-red-800/60 text-red-300 font-bold"
+                >
+                  <LogOut className="w-4 h-4" /> TERMINATE SESSION
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Top Header Bar */}
+        <header className="hidden md:flex h-16 border-b border-[#1f293d] bg-[#0d1322]/80 backdrop-blur-md px-6 items-center justify-between sticky top-0 z-40">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
             <span className="text-cyan-400">SYSTEM:</span> ONLINE
           </div>
 
@@ -164,8 +282,30 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Dynamic Page Content */}
-        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+        {/* Dynamic Page Content (extra bottom padding for mobile floating dock) */}
+        <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-y-auto">{children}</main>
+
+        {/* Mobile Floating Cyber Dock Navigation */}
+        <div className="md:hidden fixed bottom-3 left-3 right-3 bg-[#111827]/95 border border-cyan-500/30 backdrop-blur-xl rounded-2xl p-2 z-40 shadow-2xl flex items-center justify-around">
+          {bottomNavPills.map((pill) => {
+            const Icon = pill.icon;
+            const isActive = pathname === pill.href;
+            return (
+              <Link
+                key={pill.href}
+                href={pill.href}
+                className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition ${
+                  isActive
+                    ? "text-cyan-400 bg-cyan-500/10 border border-cyan-500/40 font-bold"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span className="text-[10px]">{pill.name}</span>
+              </Link>
+            );
+          })}
+        </div>
 
         <SessionFeedbackModal />
         <AbandonedSessionPrompt />

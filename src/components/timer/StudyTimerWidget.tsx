@@ -65,17 +65,17 @@ export default function StudyTimerWidget() {
     <div className="relative">
       {/* Active Running Widget in Navigation */}
       {status !== "idle" ? (
-        <div className="flex items-center gap-3 bg-[#111827] border border-cyan-500/40 rounded-lg px-3 py-1.5 shadow-lg shadow-cyan-500/10 text-xs font-mono">
+        <div className="flex items-center gap-2 sm:gap-3 bg-[#111827] border border-cyan-500/40 rounded-lg px-2.5 sm:px-3 py-1.5 shadow-lg shadow-cyan-500/10 text-xs font-mono">
           <div className="flex items-center gap-1.5 text-cyan-400 font-bold animate-pulse">
-            <Flame className="w-4 h-4 text-cyan-400" />
+            <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
             <span>{formatTime(elapsedSeconds)}</span>
           </div>
 
-          <div className="hidden md:flex items-center gap-1.5 text-slate-400 border-l border-slate-800 pl-3">
+          <div className="hidden sm:flex items-center gap-1.5 text-slate-400 border-l border-slate-800 pl-3">
             <span className="truncate max-w-[120px] text-slate-300">{category}</span>
           </div>
 
-          <div className="flex items-center gap-1 ml-1 border-l border-slate-800 pl-2">
+          <div className="flex items-center gap-1 border-l border-slate-800 pl-1.5 sm:pl-2">
             {status === "running" ? (
               <button
                 onClick={pauseTimer}
@@ -108,15 +108,15 @@ export default function StudyTimerWidget() {
         <div className="relative">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 bg-[#111827] hover:bg-[#1a2336] border border-[#1f293d] hover:border-cyan-500/50 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-300 transition"
+            className="flex items-center gap-1.5 sm:gap-2 bg-[#111827] hover:bg-[#1a2336] border border-[#1f293d] hover:border-cyan-500/50 rounded-lg px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-mono text-slate-300 transition"
           >
             <Clock className="w-3.5 h-3.5 text-cyan-400" />
-            <span>LOG STUDY TIME</span>
+            <span>LOG TIME</span>
             <ChevronDown className="w-3 h-3 text-slate-500" />
           </button>
 
           {isExpanded && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-[#111827] border border-[#1f293d] rounded-xl shadow-2xl p-4 z-50 text-xs font-mono space-y-3">
+            <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 max-w-[88vw] bg-[#111827] border border-[#1f293d] rounded-xl shadow-2xl p-4 z-50 text-xs font-mono space-y-3">
               <div className="flex items-center justify-between text-slate-300 border-b border-slate-800 pb-2">
                 <span className="font-bold text-white flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-cyan-400" /> Log Study Session
@@ -128,7 +128,7 @@ export default function StudyTimerWidget() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("manual")}
-                  className={`flex-1 py-1 rounded text-[11px] font-bold transition flex items-center justify-center gap-1 ${
+                  className={`flex-1 py-1 rounded text-[10px] sm:text-[11px] font-bold transition flex items-center justify-center gap-1 ${
                     activeTab === "manual" ? "bg-cyan-600 text-white" : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
@@ -137,7 +137,7 @@ export default function StudyTimerWidget() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("stopwatch")}
-                  className={`flex-1 py-1 rounded text-[11px] font-bold transition flex items-center justify-center gap-1 ${
+                  className={`flex-1 py-1 rounded text-[10px] sm:text-[11px] font-bold transition flex items-center justify-center gap-1 ${
                     activeTab === "stopwatch" ? "bg-cyan-600 text-white" : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
